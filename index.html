@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Caffeine Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn-green {
+            background-color: #43a047;
+            color: white;
+        }
+
+        .btn-green:hover {
+            background-color: #388e3c;
+        }
+
+        .card {
+            border: 1px solid #c8e6c9;
+        }
+
+        .form-select,
+        .form-control {
+            border-color: #a5d6a7;
+        }
+
+        .dropdown-toggle::after {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Caffeine Tracker</h1>
+
+        <!-- Add Intake -->
+        <div class="card p-4 mb-4">
+            <h4>Add Caffeine Intake</h4>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Preset</label>
+                    <select id="preset" class="form-select">
+                        <option value="">Select a preset</option>
+                        <option value="95">Coffee (8oz) - 95mg</option>
+                        <option value="143">Coffee (12oz) - 143mg</option>
+                        <option value="190">Coffee (16oz) - 190mg</option>
+                        <option value="45">Soda (12oz) - 45mg</option>
+                        <option value="83">Soda (22oz) - 83mg</option>
+                        <option value="120">Soda (32oz) - 120mg</option>
+                        <option value="160">Energy Drink (16oz) - 160mg</option>
+                        <option value="28">Green Tea (8oz) - 28mg</option>
+                        <option value="47">Black Tea (8oz) - 47mg</option>
+                        <option value="63">Espresso Shot (1oz) - 63mg</option>
+                        <option value="85">Yerba Mate (8oz) - 85mg</option>
+                        <option value="5">Hot Chocolate (8oz) - 5mg</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Caffeine (mg)</label>
+                    <input type="number" id="caffeine" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Time Taken</label>
+                    <input type="time" id="time" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-green w-100" onclick="addItem()">Add</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Intake List -->
+        <div class="card p-4 mb-4">
+            <h4>Caffeine Intake List</h4>
+            <ul class="list-group" id="caffeineList"></ul>
+        </div>
+
+        <!-- Personal Factors -->
+        <div class="card p-4 mb-4">
+            <h4>Personal Factors</h4>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isPregnant">
+                <label class="form-check-label" for="isPregnant">Pregnant</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isSmoker">
+                <label class="form-check-label" for="isSmoker">Smoker</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isInfant">
+                <label class="form-check-label" for="isInfant">Under 1 year old</label>
+            </div>
+            <div id="infantWarning" class="text-danger fw-bold d-none">
+                ⚠️ Warning: Highly advised not to give caffeine to infants.
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="poorLiver">
+                <label class="form-check-label" for="poorLiver">Poor liver health</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="oralContraceptives">
+                <label class="form-check-label" for="oralContraceptives">Taken oral contraceptives in the last 24
+                    hours</label>
+            </div>
+            <div class="row g-2 mt-2">
+                <div class="col-md-6">
+                    <label class="form-label">Weight (lbs)</label>
+                    <input type="number" id="userWeight" class="form-control" value="154">
+                </div>
+            </div>
+            <p class="mt-3">
+                Estimated Half-Life: <strong id="estimatedHalfLife">300</strong> minutes
+            </p>
+        </div>
+
+        <!-- When to Calculate -->
+        <div class="card p-4 mb-4">
+            <h4>When to Calculate?</h4>
+            <div class="btn-group mb-3" role="group">
+                <button class="btn btn-outline-success" onclick="setRelativeTime(0)">Now</button>
+                <button class="btn btn-outline-success" onclick="setRelativeTime(1)">In 1 hour</button>
+                <button class="btn btn-outline-success" onclick="setRelativeTime(4)">In 4 hours</button>
+                <button class="btn btn-outline-success" onclick="setRelativeTime(24)">In 24 hours</button>
+            </div>
+            <input type="datetime-local" id="customCalcTime" class="form-control" />
+        </div>
+
+        <!-- Calculate Button -->
+        <div class="text-center mb-4">
+            <button class="btn btn-green btn-lg" onclick="calculateCaffeine()">Calculate</button>
+        </div>
+
+        <!-- Results -->
+        <div id="resultsSection" class="card p-4 d-none">
+            <h4>Results</h4>
+            <p id="resultsText"></p>
+            <p id="warningsText" class="text-danger"></p>
+            <p>
+                <a href="https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much"
+                    target="_blank">
+                    Learn more about caffeine and its effects
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const estimatedHalfLifeEl = document.getElementById("estimatedHalfLife");
+        const infantCheckbox = document.getElementById("isInfant");
+        const infantWarning = document.getElementById("infantWarning");
+        const resultsSection = document.getElementById("resultsSection");
+        const resultsText = document.getElementById("resultsText");
+        const warningsText = document.getElementById("warningsText");
+        const caffeineListEl = document.getElementById("caffeineList");
+        const presetEl = document.getElementById("preset");
+        const caffeineInputEl = document.getElementById("caffeine");
+
+        let caffeineData = [];
+        let relativeTimeOffset = 0;
+
+        // calculate half-life including weight factor
+        function calculateHalfLife() {
+            let halfLife = 300;
+            if (document.getElementById("isPregnant").checked) halfLife *= 1.2;
+            if (document.getElementById("isSmoker").checked) halfLife *= 5 / 6;
+            if (infantCheckbox.checked) halfLife *= 10;
+            if (document.getElementById("poorLiver").checked) halfLife *= 1.5;
+            if (document.getElementById("oralContraceptives").checked) halfLife *= 1.25;
+
+            // weight in lbs → kg → scale
+            const weightLbs = parseFloat(document.getElementById("userWeight").value) || 154;
+            const weightKg = weightLbs * 0.453592;
+            halfLife *= (weightKg / 70);
+
+            estimatedHalfLifeEl.innerText = Math.round(halfLife);
+            infantWarning.classList.toggle("d-none", !infantCheckbox.checked);
+            return halfLife;
+        }
+        document.querySelectorAll("input").forEach(i => i.addEventListener("input", calculateHalfLife));
+        document.querySelectorAll(".form-check-input").forEach(i => i.addEventListener("change", calculateHalfLife));
+
+        // presets autofill caffeine field
+        presetEl.addEventListener("change", () => {
+            caffeineInputEl.value = presetEl.value;
+        });
+
+        // set the calculate-time input in local datetime format
+        function setRelativeTime(hours) {
+            const now = new Date();
+            now.setHours(now.getHours() + hours);
+            const Y = now.getFullYear(),
+                M = String(now.getMonth() + 1).padStart(2, '0'),
+                D = String(now.getDate()).padStart(2, '0'),
+                h = String(now.getHours()).padStart(2, '0'),
+                m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById("customCalcTime").value = `${Y}-${M}-${D}T${h}:${m}`;
+            relativeTimeOffset = hours;
+        }
+
+        // record intake with full timestamp
+        function addItem() {
+            const mg = parseFloat(caffeineInputEl.value);
+            const timeStr = document.getElementById("time").value;
+            if (isNaN(mg) || !timeStr) return;
+
+            const [H, Min] = timeStr.split(":").map(Number);
+            const now = new Date();
+            const intakeTime = new Date(now);
+            intakeTime.setHours(H, Min, 0, 0);
+            if (intakeTime > now) intakeTime.setDate(intakeTime.getDate() - 1);
+
+            caffeineData.push({ mg, intakeTime });
+            renderCaffeineList();
+        }
+
+        // display AM/PM and "(X hours Y minutes ago)"
+        function renderCaffeineList() {
+            caffeineListEl.innerHTML = "";
+            caffeineData.forEach((item, i) => {
+                const now = new Date();
+                const displayTime = item.intakeTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+                const elapsedMs = now - item.intakeTime;
+                const hrs = Math.floor(elapsedMs / 3600000);
+                const mins = Math.floor((elapsedMs % 3600000) / 60000);
+                let ago;
+                if (hrs > 0 && mins > 0) ago = `${hrs} hour${hrs !== 1 ? 's' : ''} ${mins} minute${mins !== 1 ? 's' : ''} ago`;
+                else if (hrs > 0) ago = `${hrs} hour${hrs !== 1 ? 's' : ''} ago`;
+                else if (mins > 0) ago = `${mins} minute${mins !== 1 ? 's' : ''} ago`;
+                else ago = "just now";
+
+                const li = document.createElement("li");
+                li.className = "list-group-item d-flex justify-content-between align-items-center";
+                li.textContent = `${item.mg} mg at ${displayTime} (${ago})`;
+                const btn = document.createElement("button");
+                btn.className = "btn btn-sm btn-danger";
+                btn.textContent = "✕";
+                btn.onclick = () => { caffeineData.splice(i, 1); renderCaffeineList(); };
+                li.appendChild(btn);
+                caffeineListEl.appendChild(li);
+            });
+        }
+
+        // calculate total caffeine with updated phrasing
+        function calculateCaffeine() {
+            const halfLife = calculateHalfLife();
+            const calcTime = new Date(document.getElementById("customCalcTime").value);
+            if (!caffeineData.length || isNaN(calcTime)) {
+                resultsText.innerText = "Please add at least one caffeine entry and select a valid time.";
+                warningsText.innerText = "";
+                resultsSection.classList.remove("d-none");
+                return;
+            }
+
+            let total = 0, warnings = [];
+            caffeineData.forEach(({ mg, intakeTime }) => {
+                const elapsedMin = (calcTime - intakeTime) / 60000;
+                if (elapsedMin < 0) return;
+                total += mg * Math.pow(0.5, elapsedMin / halfLife);
+            });
+
+            const timeText = calcTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+            let resultStr;
+            if (relativeTimeOffset === 0) {
+                resultStr = `You currently have approximately ${Math.round(total)} mg of caffeine.`;
+            } else {
+                resultStr = `In ${relativeTimeOffset} hours (${timeText}) you will have approximately ${Math.round(total)} mg of caffeine.`;
+            }
+            resultsText.innerText = resultStr;
+
+            if (infantCheckbox.checked) warnings.push("⚠️ Do not give caffeine to infants.");
+            if (total > 400) warnings.push("⚠️ Above FDA daily caffeine limit (400 mg).");
+            if (total > 100) warnings.push("⚠️ May negatively impact sleep quality.");
+
+            warningsText.innerHTML = warnings.join("<br>");
+            resultsSection.classList.remove("d-none");
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
